@@ -1,0 +1,13 @@
+#!/bin/bash
+N1=1000
+N2=2000000
+delta=79960
+for ((N=$N1; N<=$N2; N=(($N+$delta))))
+do
+echo $(./lab2-framewave $N 1) >> f1.txt
+echo $(./lab2-framewave $N 3) >> f3.txt
+echo $(./lab2-framewave $N 6) >> f6.txt
+echo $(./lab2-framewave $N 12) >> f12.txt
+echo $(./lab2-framewave $N 24) >> f24.txt
+done
+

@@ -1,0 +1,2 @@
+#!/bin/bash
+gcc -O3 -Wall -Werror lab2.c -o lab2-framewave -lfwBase -lfwSignal -LFramewave/lib -lm

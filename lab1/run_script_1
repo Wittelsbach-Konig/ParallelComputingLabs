@@ -1,0 +1,13 @@
+#!/bin/bash
+N1=1000
+N2=2000000
+delta=79960
+for ((N=$N1; N<=$N2; N=(($N+$delta))))
+do
+echo $(./lab1-seq $N) >> lab2-f-seq.txt
+echo $(./lab1-par-1 $N) >> lab2-f-1.txt
+echo $(./lab1-par-3 $N) >> lab2-f-3.txt
+echo $(./lab1-par-6 $N) >> lab2-f-6.txt
+echo $(./lab1-par-12 $N) >> lab2-f-12.txt
+echo $(./lab1-par-24 $N) >> lab2-f-24.txt
+done
