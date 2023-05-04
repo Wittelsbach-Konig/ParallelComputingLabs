@@ -5,11 +5,8 @@
 
 #include <omp.h>
 
-
-#define _OPENMP
-#define CHUNK 1
-#define SCHEDULE guided
-
+#define CHUNK
+#define SCHEDULE
 
 int main(int argc, char* argv[]) {
     int i, N;
@@ -20,6 +17,7 @@ int main(int argc, char* argv[]) {
         omp_set_dynamic(0);
         const int THREADS = atoi(argv[2]);
         omp_set_num_threads(THREADS);
+        printf("X = %d\n", 1);
     #endif
     gettimeofday(&T1, NULL); /* запомнить текущее время T1 */
     int N2 = N/2; /* N2 равен N/2*/
@@ -51,7 +49,7 @@ int main(int argc, char* argv[]) {
         {
             // MAP
             #if defined(CHUNK) && defined(SCHEDULE)
-            #pragma omp for schedule(SCHEDULE, CHUNK) nowait
+            #pragma omp for schedule(runtime) nowait
             #else
             #pragma omp for nowait
             #endif
@@ -59,7 +57,7 @@ int main(int argc, char* argv[]) {
                 M1[k] = exp(sqrt(M1[k]));
             }
             #if defined(CHUNK) && defined(SCHEDULE)
-            #pragma omp for schedule(SCHEDULE, CHUNK) nowait
+            #pragma omp for schedule(runtime) nowait
             #else
             #pragma omp for nowait
             #endif
@@ -67,7 +65,7 @@ int main(int argc, char* argv[]) {
                 M2_old[k] = M2[k];
             }
             #if defined(CHUNK) && defined(SCHEDULE)
-            #pragma omp for schedule(SCHEDULE, CHUNK)
+            #pragma omp for schedule(runtime)
             #else
             #pragma omp for
             #endif
@@ -75,7 +73,7 @@ int main(int argc, char* argv[]) {
                 M2[k] = M2[k] + M2_old[k-1];
             }
             #if defined(CHUNK) && defined(SCHEDULE)
-            #pragma omp for schedule(SCHEDULE, CHUNK)
+            #pragma omp for schedule(runtime)
             #else
             #pragma omp for
             #endif
@@ -84,7 +82,7 @@ int main(int argc, char* argv[]) {
             }
             // MERGE
             #if defined(CHUNK) && defined(SCHEDULE)
-            #pragma omp for schedule(SCHEDULE, CHUNK)
+            #pragma omp for schedule(runtime)
             #else
             #pragma omp for
             #endif
@@ -108,7 +106,7 @@ int main(int argc, char* argv[]) {
                 M2[k] = key;
             }
             */
-        /*----------------------------------------------------------------------*/
+            /*----------------------------------------------------------------------*/
             // REDUCE            
             #pragma omp single
             key = M2[0];
@@ -121,7 +119,7 @@ int main(int argc, char* argv[]) {
                 }
             }
             #if defined(CHUNK) && defined(SCHEDULE)
-            #pragma omp for reduction(+ : X) schedule(SCHEDULE, CHUNK)
+            #pragma omp for reduction(+ : X) schedule(runtime)
             #else
             #pragma omp for reduction(+ : X)
             #endif
@@ -137,6 +135,7 @@ int main(int argc, char* argv[]) {
         /* Решить поставленную задачу, заполнить массив с результатами*/
         /* Отсортировать массив с результатами указанным методом */
     }
+    printf("%f\n", X);
     gettimeofday(&T2, NULL); /* запомнить текущее время T2 */
     delta_ms = 1000*(T2.tv_sec - T1.tv_sec) + (T2.tv_usec - T1.tv_usec) / 1000;
     //printf("\nN=%d. Milliseconds passed: %ld\n", N, delta_ms); /* T2 - T1 */
