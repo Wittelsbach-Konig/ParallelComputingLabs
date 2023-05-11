@@ -4,10 +4,10 @@
 #include <math.h>
 
 #include <omp.h>
-/*
+
 #define CHUNK
 #define SCHEDULE
-*/
+
 int main(int argc, char* argv[]) {
     int i, N;
     struct timeval T1, T2;
@@ -134,10 +134,10 @@ int main(int argc, char* argv[]) {
         /* Решить поставленную задачу, заполнить массив с результатами*/
         /* Отсортировать массив с результатами указанным методом */
     }
+    printf("%f\n", X);
     gettimeofday(&T2, NULL); /* запомнить текущее время T2 */
     delta_ms = 1000*(T2.tv_sec - T1.tv_sec) + (T2.tv_usec - T1.tv_usec) / 1000;
     //printf("\nN=%d. Milliseconds passed: %ld\n", N, delta_ms); /* T2 - T1 */
-    printf("%f\n", X);
     printf("%ld\n",delta_ms);
     free(M1);
     free(M2);

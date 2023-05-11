@@ -21,28 +21,38 @@ def run(
     n_size: int = 1,
     k: int = 0,
     ignore: bool = False,
+    schedule: str = ''
 ):
     env = ''
     if k == 0:
         path = f'./{COMPILER}/{LABPREFIX["DEFAULT"]} {n_size}'
     else:
-        env = f'OMP_NUM_THREADS={k} OMP_DYNAMIC=FALSE '
-        path = f'{env}./{COMPILER}/{LABPREFIX["PARALLEL"]} {n_size} {k}'
+        env = f'OMP_NUM_THREADS={k} OMP_DYNAMIC=FALSE {schedule}'
+        path = f'{env} ./{COMPILER}/{LABPREFIX["FULL"]} {n_size} {k}'
     result = os.popen(path).read()
+
     numbers, timing = result.split('\n')[:2]
+
     if not ignore:
         print(f'{path} {timing}')
     return numbers, int(timing)
 
 
-def plt_save(n_variants: list, results: Dict, postfix: str = 'results'):
+def plt_save(
+    n_variants: list,
+    results: Dict,
+    postfix: str = 'results',
+    label_y: str = 'Execution ms'
+):
     for i in results:
-        print(f'{results[i]=}\n{n_variants=}')
-        plt.plot(n_variants, results[i], label=f"parall {i}")
+        # print(f'{results[i]=}\n{n_variants=}')
+        plt.plot(n_variants, results[i], 'o--', label=f"k = {i}")
 
     plt.xlabel('N')
-    plt.ylabel('Exec ms')
+    plt.ylabel(label_y)
     plt.legend()
+    plt.grid()
+    plt.title(f'{postfix}')
     plt.savefig(f'./media/{COMPILER}_{postfix}.png')
     plt.clf()
 
@@ -51,21 +61,24 @@ def main(args):
     k = args.k_variants
     results = {}
     n_variants = n_range(N1, N2)
-    print(f'{COMPILER=} {n_variants=}')
+    # print(f'{COMPILER=} {n_variants=}')
     for n_threads in k:
         results[n_threads] = []
     for n in n_variants:
         for n_threads in k:
-            # prepend run
             for i in range(3):
                 run(100, n_threads, True)
 
-            numbers, timing = run(n, n_threads, False)
+            numbers, timing = run(n, n_threads, True)
             results[n_threads].append(timing)
-            #print(numbers)
-            print(timing)
+            # print(numbers)
+            # print(timing)
 
-    plt_save(n_variants, results)
+    plt_save(n_variants, results, 'exec_time')
+    parall_boost = {}
+    for i in results:
+        parall_boost[i] = [b / m for b, m in zip(results[0], results[i])]
+    plt_save(n_variants, parall_boost, 'parallel_boost', 'Parallel Boost')
 
 
 if __name__ == '__main__':

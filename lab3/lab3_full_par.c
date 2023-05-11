@@ -28,24 +28,43 @@ int main(int argc, char* argv[]) {
     double key, X;
     int j, k;
     //int z, min_s;
-    unsigned int seed;
-    unsigned int* restrict seedp = &seed;
-    unsigned int* restrict seedp1 = &seed;
+    unsigned int seed1[THREADS];
+    unsigned int seed2[THREADS];
+
     for (i=0; i < 100; ++i) { /* 100 экспериментов */
         /* инициализировать начальное значение ГСЧ */
-        seed = i;
         X = 0.0;
         /* Заполнить массив исходных данных размером N */
         // GENERATE
+        /*
         for(j=0; j < N; ++j) {
             M1[j]=((double)rand_r(seedp) / (RAND_MAX)) * (max - min) + min;
         }
         for (k=0; k < N2; ++k) {
             M2[k]=((double)rand_r(seedp1) / (RAND_MAX)) * (max_2 - max) + max;
         }
+        */
         /*----------------------------------------------------------------------*/
-        #pragma omp parallel default(none) shared(N, N2, M1, M2, M2_old, key, X) private(k)
+        #pragma omp parallel default(none) shared(N, N2, M1, M2, M2_old, key, X, max_2, max, min, seed1, seed2) private(k)
         {
+            // Parallel
+            #pragma omp parallel
+            {
+                int tid = omp_get_thread_num();
+                seed1[tid] = rand();
+                seed2[tid] = rand();
+            }
+            #pragma omp for
+            for (k = 0 ; k < N; ++k){
+                int tid = omp_get_thread_num();
+                unsigned int local_seed = seed1[tid] + k;
+                M1[k]=((double)rand_r(&local_seed) / (RAND_MAX)) * (max - min) + min;
+            }
+            for (k = 0; k < N2; ++k){
+                int tid = omp_get_thread_num();
+                unsigned int local_seed1 = seed2[tid] + k;
+                M2[k]=((double)rand_r(&local_seed1) / (RAND_MAX)) * (max_2 - max) + max;
+            }
             // MAP
             #if defined(CHUNK) && defined(SCHEDULE)
             #pragma omp for schedule(runtime) nowait

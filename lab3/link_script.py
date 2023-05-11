@@ -2,26 +2,42 @@ import os
 import shutil
 
 LAB_NAME = 'lab3.c'
+LAB_NAME_SCHEDULE = 'lab3-SCHEDULE.c'
+LAB_NAME_FULL = 'lab3_full_par.c'
 COMPILER = 'gcc'
 LABPREFIX = {
     'DEFAULT': 'lab-seq',
     'PARALLEL': 'lab-3-par',
     'ADDITIONAL': 'lab-3-add',
+    'SCHEDULE': 'lab-3-sche',
+    'FULL': 'lab-3-full'
 }
 
 
-def build() -> None:
+def build(optimizer: str = '-O1') -> None:
     """Скомпилировать программу lab.c"""
     os.system(
         (
-            f'{COMPILER} -O1 -Wall {LAB_NAME} '
+            f'{COMPILER} {optimizer} -Wall {LAB_NAME} '
             f'-o {COMPILER}/{LABPREFIX["DEFAULT"]} -lm -lgomp'
         )
     )
     os.system(
         (
-            f'{COMPILER} -O1 -Wall -fopenmp {LAB_NAME} '
+            f'{COMPILER} {optimizer} -Wall -fopenmp {LAB_NAME} '
             f'-o {COMPILER}/{LABPREFIX["PARALLEL"]} -lm -lgomp'
+        )
+    )
+    os.system(
+        (
+            f'{COMPILER} {optimizer} -Wall -fopenmp {LAB_NAME_SCHEDULE} '
+            f'-o {COMPILER}/{LABPREFIX["SCHEDULE"]} -lm -lgomp'
+        )
+    )
+    os.system(
+        (
+            f'{COMPILER} {optimizer} -Wall -fopenmp {LAB_NAME_FULL} '
+            f'-o {COMPILER}/{LABPREFIX["FULL"]} -lm -lgomp'
         )
     )
 #    os.system(
