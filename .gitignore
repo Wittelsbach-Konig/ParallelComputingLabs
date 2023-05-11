@@ -3,6 +3,7 @@
 
 # lab
 lab-*
+media/
 
 # Object files
 *.o

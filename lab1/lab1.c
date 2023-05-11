@@ -94,6 +94,7 @@ int main(int argc, char* argv[]) {
     gettimeofday(&T2, NULL); /* запомнить текущее время T2 */
     delta_ms = 1000*(T2.tv_sec - T1.tv_sec) + (T2.tv_usec - T1.tv_usec) / 1000;
     //printf("\nN=%d. Milliseconds passed: %ld\n", N, delta_ms); /* T2 - T1 */
-    printf("\n%ld\n",delta_ms);
+    printf("%f\n", X);
+    printf("%ld\n",delta_ms);
     return 0;
 }
