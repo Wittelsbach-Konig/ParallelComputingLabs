@@ -17,6 +17,10 @@ int main(int argc, char* argv[]) {
         omp_set_dynamic(0);
         const int THREADS = atoi(argv[2]);
         omp_set_num_threads(THREADS);
+        int chunk;
+        omp_sched_t kind;
+        omp_get_schedule(&kind, &chunk);
+        printf("%d %d\n", kind, chunk);
     #endif
     gettimeofday(&T1, NULL); /* запомнить текущее время T1 */
     int N2 = N/2; /* N2 равен N/2*/

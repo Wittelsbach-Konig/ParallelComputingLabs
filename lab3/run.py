@@ -28,7 +28,7 @@ def run(
         path = f'./{COMPILER}/{LABPREFIX["DEFAULT"]} {n_size}'
     else:
         env = f'OMP_NUM_THREADS={k} OMP_DYNAMIC=FALSE {schedule}'
-        path = f'{env} ./{COMPILER}/{LABPREFIX["FULL"]} {n_size} {k}'
+        path = f'{env} ./{COMPILER}/{LABPREFIX["PARALLEL"]} {n_size} {k}'
     result = os.popen(path).read()
 
     numbers, timing = result.split('\n')[:2]

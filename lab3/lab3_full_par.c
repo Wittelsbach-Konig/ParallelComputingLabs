@@ -60,6 +60,7 @@ int main(int argc, char* argv[]) {
                 unsigned int local_seed = seed1[tid] + k;
                 M1[k]=((double)rand_r(&local_seed) / (RAND_MAX)) * (max - min) + min;
             }
+            #pragma omp for
             for (k = 0; k < N2; ++k){
                 int tid = omp_get_thread_num();
                 unsigned int local_seed1 = seed2[tid] + k;
