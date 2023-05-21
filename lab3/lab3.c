@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
             #if defined(CHUNK) && defined(SCHEDULE)
             #pragma omp for schedule(runtime) nowait
             #else
-            #pragma omp for nowait
+            #pragma omp for
             #endif
             for (k = 0; k < N2; ++k) {
                 M2_old[k] = M2[k];

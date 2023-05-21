@@ -3,6 +3,41 @@
 #include <sys/time.h>
 #include <math.h>
 
+void swap(double *xp, double *yp)
+{
+    double temp = *xp;
+    *xp = *yp;
+    *yp = temp;
+}
+
+void selectionSort(double arr[], int start, int end)
+{
+    int i, j, min_idx;
+    // One by one move boundary of unsorted subarray
+    for (i = start; i < end-1; i++)
+    {
+        // Find the minimum element in unsorted array
+        min_idx = i;
+        for (j = i+1; j < end; j++)
+          if (arr[j] < arr[min_idx])
+            min_idx = j;
+ 
+        // Swap the found minimum element with the first element
+           if(min_idx != i)
+            swap(&arr[min_idx], &arr[i]);
+    }
+}
+
+void generate_array(double *restrict m, int size, unsigned int min, unsigned int max, int seed)
+{
+    //int tmp_seed;
+    // #pragma omp for private(tmp_seed)
+    for (int i = 0; i < size; ++i)
+    {
+        unsigned int tmp_seed = sqrt(i + seed);
+        m[i] = ((double)rand_r(&tmp_seed) / (RAND_MAX)) * (max - min) + min;
+    }
+}
 
 int main(int argc, char* argv[]) {
     int i, N;
@@ -16,23 +51,17 @@ int main(int argc, char* argv[]) {
     double* restrict M2_old = (double*) malloc(N2 * sizeof(double));
     double A = 490.0; /* Ф*И*О */
     double min = 1; double max = A; double max_2 = max * 10;
-    double key, X, intergal_part;
+    double key, X;
     int j, k;
     //int z, min_s;
     unsigned int seed;
-    unsigned int* restrict seedp = &seed;
-    unsigned int* restrict seedp1 = &seed;
     for (i=0; i < 100; ++i) { /* 100 экспериментов */
         /* инициализировать начальное значение ГСЧ */
         seed = i;
         /* Заполнить массив исходных данных размером N */
         // GENERATE
-        for(j=0; j < N; ++j) {
-            M1[j]=((double)rand_r(seedp) / (RAND_MAX)) * (max - min) + min;
-        }
-        for (k=0; k < N2; ++k) {
-            M2[k]=((double)rand_r(seedp1) / (RAND_MAX)) * (max_2 - max) + max;
-        }
+        generate_array(M1, N, min, max, seed);
+        generate_array(M2, N2, max, max_2, seed+2);
         // MAP
         for (j = 0; j < N; ++j) {
             M1[j] = exp(sqrt(M1[j]));
@@ -40,13 +69,10 @@ int main(int argc, char* argv[]) {
         for (k = 0; k < N2; ++k) {
             M2_old[k] = M2[k];
         }
-        for(k = 0; k < N2; ++k){
-            if(k > 0) {
-                M2[k] = M2[k] + M2_old[k-1];
-            }
-            else {
-                M2[k] = M2[k] + 0;
-            }
+        for(int k = 1; k < N2; ++k) {
+            M2[k] = M2[k] + M2_old[k-1];
+        }
+        for(int k = 0; k < N2; ++k) {
             M2[k] = log(fabs(tan(M2[k])));
         }
         // MERGE
@@ -54,21 +80,7 @@ int main(int argc, char* argv[]) {
             M2[k]= M1[k] * M2[k];
         }
         // SORT
-        /*
-        for (k = 0; k < (N2-1); ++k) {
-            min_s = k;
-            for (j = k + 1; j < N2; ++j) {
-                if (M2[min_s] > M2[j]) {
-                    min_s = j;
-                }
-            }
-            key = M2[min_s];
-            for(z = min_s; z > k; --z) {
-                M2[z] = M2[z-1];
-            }
-            M2[k] = key;
-        }
-        */
+        selectionSort(M2, 0, N2);
         // REDUCE
         X = 0.0;
         key = M2[0];
@@ -79,11 +91,9 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-        for(k = 0; k < N2; k++) {
-            double del = (double)M2[k] / key;
-            modf(del, &intergal_part);
-            if (((int)intergal_part % 2) == 0) {
-                X= X + sin(M2[k]);
+        for(int k = 0; k < N2; ++k) {
+            if (((int)(M2[k] / key) % 2) == 0) {
+                X += sin(M2[k]);
             }
         }
         //printf("X = %f", X);
@@ -91,6 +101,7 @@ int main(int argc, char* argv[]) {
         /* Решить поставленную задачу, заполнить массив с результатами*/
         /* Отсортировать массив с результатами указанным методом */
     }
+    printf("X= %f\n", X);
     gettimeofday(&T2, NULL); /* запомнить текущее время T2 */
     delta_ms = 1000*(T2.tv_sec - T1.tv_sec) + (T2.tv_usec - T1.tv_usec) / 1000;
     //printf("\nN=%d. Milliseconds passed: %ld\n", N, delta_ms); /* T2 - T1 */
