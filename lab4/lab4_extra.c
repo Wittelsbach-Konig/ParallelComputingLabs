@@ -158,7 +158,7 @@ int mainpart(int argc, char *argv[],int* progress, int *i)
     unsigned int seed;
     long long delta_ms;
     N = atoi(argv[1]);  /* N равен первому параметру командной строки */
-    T1 = omp_get_wtime();
+    long* iterations_exec_time = malloc(10 * sizeof(long));
     int N_2 = N / 2;
     double A = 490.0; /* Ф*И*О */
     double min = 1; double max = A; double max_2 = max * 10;
@@ -173,7 +173,8 @@ int mainpart(int argc, char *argv[],int* progress, int *i)
         omp_set_num_threads(num_threads);
     #endif
 
-    for (int j = 0; j < 100; ++j) {
+    for (int j = 0; j < 10; ++j) {
+        T1 = omp_get_wtime();
         X = 0.0;
         seed = j;
         *i = j;
@@ -236,12 +237,20 @@ int mainpart(int argc, char *argv[],int* progress, int *i)
             }
             /*----------------------------------------------------------------------*/
         }
+        T2 = omp_get_wtime();
+        delta_ms = 1000* (T2 - T1);
+        iterations_exec_time[j] = delta_ms;
+        //printf("%lld\n", delta_ms);
     }
     *progress = 1;
-    printf("X= %f\n", X);
-    T2 = omp_get_wtime();
-    delta_ms = 1000* (T2 - T1);
-    printf("%lld\n", delta_ms);
+    //printf("X= %f\n", X);
+    //printf("[");
+    for (long j = 0; j < 10; j++) {
+        printf("%ld", iterations_exec_time[j]);
+        if (j != 9 ) printf("; ");
+    }
+    //printf("]\n");
+    
     return 0;
 }
 
@@ -256,7 +265,7 @@ void progressnotifier(int *progress, int *i)
             usleep(100);
             continue;
         };
-        printf("\nPROGRESS: %d\n", *i);
+        // printf("\nPROGRESS: %d\n", *i);
         time = time_temp;
     }
 }
