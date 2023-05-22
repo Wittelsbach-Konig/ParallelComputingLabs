@@ -10,7 +10,7 @@ seq_approach() {
         ."/lab-4-$1" $2 | tail -n1 | awk '{ print $NF; }'
     }
     PERF=$1
-    echo -n "N;par;seq;$k" >> $PERF
+    echo -n "N;seq" >> $PERF
     echo >> $PERF
     for (( I=$N1; I<=$N2; I+=$Dn )); do
         echo -n $I >> $PERF
@@ -45,12 +45,12 @@ mark4_task() {
         ."/lab-4-$1" $2 12 0 | tail -n1
     }
     PERF=$1
-    echo -n "N,par,seq" >> $PERF
+    echo -n "N;par;seq" >> $PERF
     echo >> $PERF
     for (( I=$N1; I<=$N2; I+=$Dn )); do
         echo -n $I >> $PERF
-        echo -n ",$(measure_perf par-extra $I)" >> $PERF
-        echo -n ",$(measure_perf seq $I)" >> $PERF
+        echo -n ";$(measure_perf par-extra $I)" >> $PERF
+        echo -n ";$(measure_perf seq_1 $I)" >> $PERF
         echo >> $PERF
     done
     #python3 confidence_interval.py $PERF

@@ -10,6 +10,16 @@ void swap(double *xp, double *yp)
     *yp = temp;
 }
 
+double omp_get_wtime()
+{
+    struct timeval T;
+    double time_ms;
+
+    gettimeofday(&T, NULL);
+    time_ms = (1000.0 * ((double)T.tv_sec) + ((double)T.tv_usec) / 1000.0);
+    return (double)(time_ms / 1000.0);
+}
+
 void selectionSort(double arr[], int start, int end)
 {
     int i, j, min_idx;
@@ -41,10 +51,10 @@ void generate_array(double *restrict m, int size, unsigned int min, unsigned int
 
 int main(int argc, char* argv[]) {
     int i, N;
-    struct timeval T1, T2;
+    double T1, T2;
     long delta_ms;
     N = atoi(argv[1]); /* N равен первому параметру командной строки */
-    
+    long* iterations_exec_time = malloc(10 * sizeof(long));
     int N2 = N/2; /* N2 равен N/2*/
     double* restrict M1 = (double*) malloc(N * sizeof(double)); 
     double* restrict M2 = (double*) malloc(N2 * sizeof(double)); /* Массивы M1 разм N и M2 разм N2*/
@@ -55,10 +65,10 @@ int main(int argc, char* argv[]) {
     int j, k;
     //int z, min_s;
     unsigned int seed;
-    for (i=0; i < 100; ++i) { /* 100 экспериментов */
+    for (i=0; i < 10; ++i) { /* 100 экспериментов */
         /* инициализировать начальное значение ГСЧ */
         seed = i;
-        gettimeofday(&T1, NULL); /* запомнить текущее время T1 */
+        T1 = omp_get_wtime();
         /* Заполнить массив исходных данных размером N */
         // GENERATE
         generate_array(M1, N, min, max, seed);
@@ -101,12 +111,18 @@ int main(int argc, char* argv[]) {
         //printf("\n\n");
         /* Решить поставленную задачу, заполнить массив с результатами*/
         /* Отсортировать массив с результатами указанным методом */
-        gettimeofday(&T2, NULL); /* запомнить текущее время T2 */
+        T2 = omp_get_wtime();
+        delta_ms = 1000* (T2 - T1);
+        // printf("\n%ld\n",delta_ms);
+        iterations_exec_time[i] = delta_ms;
     }
     //printf("X= %f\n", X);
+    for (long j = 0; j < 10; j++) {
+        printf("%ld", iterations_exec_time[j]);
+        if (j != 9 ) printf("; ");
+    }
     
-    delta_ms = 1000*(T2.tv_sec - T1.tv_sec) + (T2.tv_usec - T1.tv_usec) / 1000;
     //printf("\nN=%d. Milliseconds passed: %ld\n", N, delta_ms); /* T2 - T1 */
-    printf("\n%ld\n",delta_ms);
+    //printf("\n%ld\n",delta_ms);
     return 0;
 }

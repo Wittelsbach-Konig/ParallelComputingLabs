@@ -244,12 +244,12 @@ int mainpart(int argc, char *argv[],int* progress, int *i)
     }
     *progress = 1;
     //printf("X= %f\n", X);
-    printf("[");
+    //printf("[");
     for (long j = 0; j < 10; j++) {
         printf("%ld", iterations_exec_time[j]);
         if (j != 9 ) printf("; ");
     }
-    printf("]\n");
+    //printf("]\n");
     
     return 0;
 }
