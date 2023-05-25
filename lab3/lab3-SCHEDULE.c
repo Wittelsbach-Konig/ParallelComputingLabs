@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
         int chunk;
         omp_sched_t kind;
         omp_get_schedule(&kind, &chunk);
-        printf("%d %d\n", kind, chunk);
+        // printf("%d %d\n", kind, chunk);
     #endif
     gettimeofday(&T1, NULL); /* запомнить текущее время T1 */
     int N2 = N/2; /* N2 равен N/2*/
@@ -138,10 +138,10 @@ int main(int argc, char* argv[]) {
         /* Решить поставленную задачу, заполнить массив с результатами*/
         /* Отсортировать массив с результатами указанным методом */
     }
-    printf("%f\n", X);
     gettimeofday(&T2, NULL); /* запомнить текущее время T2 */
     delta_ms = 1000*(T2.tv_sec - T1.tv_sec) + (T2.tv_usec - T1.tv_usec) / 1000;
     //printf("\nN=%d. Milliseconds passed: %ld\n", N, delta_ms); /* T2 - T1 */
+    printf("%f\n", X);
     printf("%ld\n",delta_ms);
     free(M1);
     free(M2);

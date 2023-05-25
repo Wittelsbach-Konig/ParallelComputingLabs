@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 from typing import Dict, List
 
-from link_script_opt import LABPREFIX, LAB_NAME, COMPILER, build
+from link_script import LABPREFIX, LAB_NAME, COMPILER, build_opt
 from run import plt_save, n_range
 
 
@@ -44,7 +44,7 @@ def main():
         results[opt] = []
     for n in n_variants:
         for opt in OPTIMIZER:
-            build(optimizer=opt)
+            build_opt(optimizer=opt)
             for i in range(3):
                 run(100)
 

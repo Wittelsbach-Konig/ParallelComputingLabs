@@ -60,7 +60,7 @@ def main(args):
     for i in results:
         if i != 3:
             parall_boost[i] = [b / m for b, m in zip(results[3], results[i])]
-    plt_save(n_variants, parall_boost, SCHE, 'parallel_boost')
+    plt_save(n_variants, parall_boost, SCHE, 'parallel_boost', 'chunk_size')
 
 
 if __name__ == '__main__':

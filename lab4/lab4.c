@@ -135,10 +135,17 @@ void sort_k(double * restrict MM, int size, double *restrict dst) {
     }
 }
 
-void sort_half(double * restrict MM, int size, double *restrict dst, int num_threads)
+void compare_time(double start_time, double end_time, double* min_time) {
+    double step_time = 1000 * (end_time - start_time);
+    if ((*min_time == -1.0) || (step_time < *min_time))
+        *min_time = step_time;
+}
+
+void sort_half(double * restrict MM, int size, double *restrict dst, int num_threads, double* min_time)
 {
     int n1 = size / 2;
     //omp_set_num_threads(2);
+    double step_t1 = omp_get_wtime();
     #pragma omp sections
     {
         #pragma omp section
@@ -149,6 +156,8 @@ void sort_half(double * restrict MM, int size, double *restrict dst, int num_thr
     #pragma omp single
     merge_sorted(MM, n1, MM + n1, size - n1, dst);
     //omp_set_num_threads(num_threads);
+    double step_t2 = omp_get_wtime();
+    compare_time(step_t1, step_t2, min_time);
 }
 
 int mainpart(int argc, char *argv[],int* progress, int *i)
@@ -172,18 +181,27 @@ int mainpart(int argc, char *argv[],int* progress, int *i)
         omp_set_dynamic(0);
         omp_set_num_threads(num_threads);
     #endif
-
+   double step_t1, step_t2;
+    double  minimal_generate_time = -1.0,
+            minimal_map_time = -1.0,
+            minimal_merge_time = -1.0,
+            minimal_sort_time = -1.0,
+            minimal_reduce_time = -1.0;
     for (int j = 0; j < 100; ++j) {
         X = 0.0;
         seed = j;
         *i = j;
         /* Generate */
+        step_t1 = omp_get_wtime();
         generate_array(M1, N, min, max, seed);
         generate_array(M2, N_2, max, max_2, seed+2);
+        step_t2 = omp_get_wtime();
+        compare_time(step_t1, step_t2, &minimal_generate_time);
         /*---------------------------------------------------------------*/
-        #pragma omp parallel default(none) shared(N, N_2, M1, M2, M2_old, M2_sorted, extra_task, num_threads, key, X)
+        #pragma omp parallel default(none) shared(N, N_2, M1, M2, M2_old, M2_sorted, extra_task, num_threads, key, X, step_t1, step_t2,minimal_generate_time,minimal_map_time,minimal_merge_time,minimal_sort_time,minimal_reduce_time)
         {
             // MAP
+            step_t1 = omp_get_wtime();
             #pragma omp for nowait
             for (int k = 0; k < N; ++k) {
                 M1[k] = exp(sqrt(M1[k]));
@@ -200,22 +218,28 @@ int mainpart(int argc, char *argv[],int* progress, int *i)
             for(int k = 0; k < N_2; ++k) {
                 M2[k] = log(fabs(tan(M2[k])));
             }
+            step_t2 = omp_get_wtime();
+            compare_time(step_t1, step_t2, &minimal_map_time);
             /*----------------------------------------------------------------------*/
             // MERGE
+            step_t1 = omp_get_wtime();
             #pragma omp for
             for(int k=0; k < N_2; ++k) {
                 M2[k]= M1[k] * M2[k];
             }
+            step_t2 = omp_get_wtime();
+            compare_time(step_t1, step_t2, &minimal_merge_time);
             /*----------------------------------------------------------------------*/
             // SORT
             if (extra_task == 0) {
-                sort_half(M2, N_2, M2_sorted, num_threads);
+                sort_half(M2, N_2, M2_sorted, num_threads, &minimal_sort_time);
             } 
             else {
                 sort_k(M2, N_2, M2_sorted);
             }
             /*----------------------------------------------------------------------*/
-            // REDUCE            
+            // REDUCE          
+            step_t1 = omp_get_wtime();  
             #pragma omp single
             key = M2_sorted[0];
             /*
@@ -234,6 +258,8 @@ int mainpart(int argc, char *argv[],int* progress, int *i)
                     X += sin(M2_sorted[k]);
                 }
             }
+            step_t2 = omp_get_wtime();
+            compare_time(step_t1, step_t2, &minimal_reduce_time);
             /*----------------------------------------------------------------------*/
         }
     }
@@ -242,6 +268,13 @@ int mainpart(int argc, char *argv[],int* progress, int *i)
     T2 = omp_get_wtime();
     delta_ms = 1000* (T2 - T1);
     printf("%lld\n", delta_ms);
+        printf("Best time: %lld ms; generate: %f ms; map: %f ms; merge: %f ms; sort: %f ms; reduce: %f ms\n",
+           delta_ms,
+           minimal_generate_time,
+           minimal_map_time,
+           minimal_merge_time,
+           minimal_sort_time,
+           minimal_reduce_time);
     return 0;
 }
 

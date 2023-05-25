@@ -48,6 +48,16 @@ def build(optimizer: str = '-O1') -> None:
 #    )
 
 
+def build_opt(optimizer: str = '-O1') -> None:
+    """Скомпилировать программу lab.c"""
+    os.system(
+        (
+            f'{COMPILER} {optimizer} -Wall -fopenmp {LAB_NAME} '
+            f'-o {COMPILER}/{LABPREFIX["PARALLEL"]} -lm -lgomp'
+        )
+    )
+
+
 def clear() -> None:
     """Очистить директорию"""
     try:

@@ -42,11 +42,12 @@ def plt_save(
     n_variants: list,
     results: Dict,
     postfix: str = 'results',
-    label_y: str = 'Execution ms'
+    label_y: str = 'Execution ms',
+    k_var: str = 'k'
 ):
     for i in results:
         # print(f'{results[i]=}\n{n_variants=}')
-        plt.plot(n_variants, results[i], 'o--', label=f"k = {i}")
+        plt.plot(n_variants, results[i], 'o--', label=f"{k_var} = {i}")
 
     plt.xlabel('N')
     plt.ylabel(label_y)

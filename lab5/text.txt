@@ -1,0 +1,4 @@
+openmp
+Best time: 5858 ms; generate: 0.193531 ms; map: 0.255689 ms; merge: 0.005169 ms; sort: 46.184551 ms; reduce: 0.115098 ms
+pthread
+Best time: 6878 ms; generate: 0.355005 ms; map: 0.524044 ms; merge: 0.066757 ms; sort: 46.607018 ms; reduce: 0.235081 ms
